@@ -1,21 +1,30 @@
 #!/bin/bash
 
-# Имя интерфейса (замени на свой)
+# Имя интерфейса
 INTERFACE="eth0"
 
-# Имя соединения
+# Имя целевого соединения
 CONNECTION_NAME="LAN1"
 
-# Удаляем существующее соединение, игнорируя ошибки
-nmcli con delete "$CONNECTION_NAME" 2>/dev/null || true
+# Проверка существования соединения LAN1
+if nmcli con show | grep -q "$CONNECTION_NAME"; then
+    # Если LAN1 существует, удаляем его
+    nmcli con delete "$CONNECTION_NAME" 2>/dev/null
+    echo "Соединение $CONNECTION_NAME удалено."
+else
+    # Если LAN1 не существует, удаляем все соединения на интерфейсе eth0
+    for conn in $(nmcli -t -f NAME,DEVICE con show | grep ":$INTERFACE$" | cut -d: -f1); do
+        nmcli con delete "$conn" 2>/dev/null
+        echo "Удалено соединение: $conn"
+    done
 
-# Создаём новое соединение
-nmcli con add type ethernet ifname "$INTERFACE" con-name "$CONNECTION_NAME" \
-    ipv4.method auto \
-    ipv6.method auto \
-    dns-search "expnet.ru"
+    # Создаём новое соединение LAN1
+    nmcli con add type ethernet ifname "$INTERFACE" con-name "$CONNECTION_NAME" \
+        ipv4.method auto \
+        ipv6.method auto \
+        dns-search "expnet.ru"
 
-# Активируем соединение
-nmcli con up "$CONNECTION_NAME"
-
-echo "Интернет-соединение пересоздано с доменом поиска expnet.ru"
+    # Активируем соединение
+    nmcli con up "$CONNECTION_NAME"
+    echo "Создано и активировано новое соединение $CONNECTION_NAME с доменом поиска expnet.ru"
+fi
