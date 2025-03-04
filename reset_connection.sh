@@ -18,13 +18,21 @@ else
         echo "Удалено соединение: $conn"
     done
 
-    # Создаём новое соединение LAN1
+    # Создаём новое соединение LAN1 без dns-search
     nmcli con add type ethernet ifname "$INTERFACE" con-name "$CONNECTION_NAME" \
         ipv4.method auto \
-        ipv6.method auto \
-        dns-search "expnet.ru"
+        ipv6.method auto
 
-    # Активируем соединение
-    nmcli con up "$CONNECTION_NAME"
-    echo "Создано и активировано новое соединение $CONNECTION_NAME с доменом поиска expnet.ru"
+    # Проверяем, успешно ли создано соединение
+    if nmcli con show | grep -q "$CONNECTION_NAME"; then
+        # Устанавливаем домен поиска expnet.ru
+        nmcli con mod "$CONNECTION_NAME" ipv4.dns-search "expnet.ru"
+
+        # Активируем соединение
+        nmcli con up "$CONNECTION_NAME"
+        echo "Создано и активировано новое соединение $CONNECTION_NAME с доменом поиска expnet.ru"
+    else
+        echo "Ошибка: не удалось создать соединение $CONNECTION_NAME"
+        exit 1
+    fi
 fi
