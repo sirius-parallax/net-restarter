@@ -6,8 +6,8 @@ INTERFACE="eth0"
 # Имя соединения
 CONNECTION_NAME="LAN1"
 
-# Удаляем существующее соединение
-nmcli con delete "$CONNECTION_NAME" 2>/dev/null
+# Удаляем существующее соединение, игнорируя ошибки
+nmcli con delete "$CONNECTION_NAME" 2>/dev/null || true
 
 # Создаём новое соединение
 nmcli con add type ethernet ifname "$INTERFACE" con-name "$CONNECTION_NAME" \
