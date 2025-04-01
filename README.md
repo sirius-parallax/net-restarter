@@ -18,6 +18,7 @@
 
 Перемести скрипт и дай права
 sudo mv reset_connection.sh /usr/local/bin/
+
 sudo chmod +x /usr/local/bin/reset_connection.sh
 
 Настрой sudoers для запуска без пароля
